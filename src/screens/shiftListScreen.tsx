@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
+  StatusBar,
 } from 'react-native';
 import { observer } from 'mobx-react-lite';
 import ShiftStore from '../stores/ShiftStore';
@@ -30,7 +31,11 @@ const ShiftListScreen: React.FC<Props> = observer(({ navigation }) => {
     try {
       const hasPermission = await GeolocationService.requestLocationPermission();
       if (!hasPermission) {
-        Alert.alert('Ошибка', 'Нет доступа к геолокации');
+        Alert.alert(
+          'Доступ к геолокации', 
+          'Приложению нужен доступ к геолокации для поиска смен. Пожалуйста, разрешите доступ в настройках устройства.',
+          [{ text: 'OK' }]
+        );
         setInitializing(false);
         return;
       }
@@ -45,7 +50,11 @@ const ShiftListScreen: React.FC<Props> = observer(({ navigation }) => {
       
     } catch (error: any) {
       console.error('Initialization error:', error);
-      Alert.alert('Ошибка', error.message || 'Не удалось получить данные');
+      Alert.alert(
+        'Ошибка', 
+        error.message || 'Не удалось получить данные. Проверьте подключение к интернету.',
+        [{ text: 'OK' }]
+      );
     } finally {
       setInitializing(false);
     }
@@ -54,11 +63,17 @@ const ShiftListScreen: React.FC<Props> = observer(({ navigation }) => {
   const loadShifts = async (latitude: number, longitude: number) => {
     try {
       ShiftStore.setLoading(true);
+      ShiftStore.setError(null);
       const response = await ApiService.getShiftsByLocation(latitude, longitude);
       ShiftStore.setShifts(response.data);
     } catch (error: any) {
       console.error('Load shifts error:', error);
       ShiftStore.setError(error.message || 'Ошибка загрузки смен');
+      Alert.alert(
+        'Ошибка загрузки', 
+        'Не удалось загрузить список смен. Потяните вниз для повтора.',
+        [{ text: 'OK' }]
+      );
     } finally {
       ShiftStore.setLoading(false);
     }
@@ -84,6 +99,7 @@ const ShiftListScreen: React.FC<Props> = observer(({ navigation }) => {
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
         <Text style={styles.loadingText}>Получение геолокации...</Text>
+        <Text style={styles.subText}>Пожалуйста, разрешите доступ к местоположению</Text>
       </View>
     );
   }
@@ -93,6 +109,7 @@ const ShiftListScreen: React.FC<Props> = observer(({ navigation }) => {
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
         <Text style={styles.loadingText}>Загрузка смен...</Text>
+        <Text style={styles.subText}>Ищем доступные смены рядом с вами</Text>
       </View>
     );
   }
@@ -108,6 +125,7 @@ const ShiftListScreen: React.FC<Props> = observer(({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
       <FlatList
         data={ShiftStore.shifts}
         keyExtractor={(item) => item.id}
@@ -122,18 +140,23 @@ const ShiftListScreen: React.FC<Props> = observer(({ navigation }) => {
             refreshing={refreshing}
             onRefresh={onRefresh}
             colors={['#007AFF']}
+            tintColor="#007AFF"
           />
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Смены не найдены</Text>
+            <Text style={styles.emptySubText}>Попробуйте обновить список</Text>
           </View>
         }
         ListHeaderComponent={
-          <Text style={styles.headerText}>
-            Доступные смены: {ShiftStore.shifts.length}
-          </Text>
+          <View style={styles.headerContainer}>
+            <Text style={styles.headerText}>
+              Доступные смены: {ShiftStore.shifts.length}
+            </Text>
+          </View>
         }
+        contentContainerStyle={ShiftStore.shifts.length === 0 ? styles.emptyList : null}
       />
     </View>
   );
@@ -149,17 +172,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#f5f5f5',
   },
   loadingText: {
     marginTop: 16,
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  subText: {
+    marginTop: 8,
+    fontSize: 14,
     color: '#666',
+    textAlign: 'center',
   },
   errorText: {
     fontSize: 16,
     color: '#ff3b30',
     textAlign: 'center',
     marginBottom: 8,
+    fontWeight: '500',
   },
   retryText: {
     fontSize: 14,
@@ -169,17 +201,32 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40,
+    paddingVertical: 60,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#666',
+    fontWeight: '500',
+  },
+  emptySubText: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 8,
+  },
+  headerContainer: {
+    backgroundColor: 'white',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   headerText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    padding: 16,
-    backgroundColor: 'white',
+    fontWeight: '600',
+    color: '#333',
+  },
+  emptyList: {
+    flexGrow: 1,
   },
 });
 
