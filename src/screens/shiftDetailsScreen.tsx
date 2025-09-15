@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { RootStackParamList } from '../navigation/AppNavigator';
+import { StackScreenProps } from '@react-navigation/stack';
 import {
   View,
   Text,
@@ -41,10 +43,7 @@ interface Shift {
   };
 }
 
-interface Props {
-  route: any;
-  navigation: any;
-}
+type Props = StackScreenProps<RootStackParamList, 'ShiftDetails'>;
 
 const ShiftDetailsScreen: React.FC<Props> = observer(({ route, navigation }) => {
   const { shiftId } = route.params;

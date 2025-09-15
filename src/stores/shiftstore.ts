@@ -1,29 +1,9 @@
 import { makeAutoObservable } from 'mobx';
-
-interface Shift {
-  id: string;
-  logo: string;
-  address: string;
-  companyName: string;
-  dateStartByCity: string;
-  timeStartByCity: string;
-  timeEndByCity: string;
-  currentWorkers: number;
-  planWorkers: number;
-  workTypes: any[];
-  priceWorker: number;
-  customerFeedbacksCount: string;
-  customerRating: number | null;
-  isPromotionEnabled: boolean;
-  coordinates: {
-    longitude: number;
-    latitude: number;
-  };
-}
+import { Shift, Location } from '../types';
 
 class ShiftStore {
   shifts: Shift[] = [];
-  currentLocation: { latitude: number; longitude: number } | null = null;
+  currentLocation: Location | null = null;
   loading: boolean = false;
   error: string | null = null;
 
@@ -35,7 +15,7 @@ class ShiftStore {
     this.shifts = shifts;
   }
 
-  setCurrentLocation(location: { latitude: number; longitude: number }) {
+  setCurrentLocation(location: Location) {
     this.currentLocation = location;
   }
 
@@ -49,6 +29,12 @@ class ShiftStore {
 
   getShiftById(id: string): Shift | undefined {
     return this.shifts.find(shift => shift.id === id);
+  }
+
+  clearData() {
+    this.shifts = [];
+    this.currentLocation = null;
+    this.error = null;
   }
 }
 

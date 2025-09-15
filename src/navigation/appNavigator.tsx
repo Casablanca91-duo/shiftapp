@@ -9,7 +9,7 @@ export type RootStackParamList = {
   ShiftDetails: { shiftId: string };
 };
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator<RootStackParamList>();
 
 function AppNavigator() {
   return (
