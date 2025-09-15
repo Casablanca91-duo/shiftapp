@@ -1,8 +1,13 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import ShiftListScreen from '../screens/shiftListScreen';
-import ShiftDetailsScreen from '../screens/shiftDetailsScreen';
+import ShiftListScreen from '../screens/ShiftListScreen';
+import ShiftDetailsScreen from '../screens/ShiftDetailsScreen';
+
+export type RootStackParamList = {
+  ShiftList: undefined;
+  ShiftDetails: { shiftId: string };
+};
 
 const Stack = createStackNavigator();
 
