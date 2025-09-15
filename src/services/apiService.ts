@@ -1,14 +1,16 @@
 import axios from 'axios';
 
 class ApiService {
-  private baseUrl = 'https://api.example.com'; // Замени на реальный URL API
-
   async getShiftsByLocation(latitude: number, longitude: number) {
     try {
-      // Пример запроса - замени на реальный endpoint
+      // Используем реальный endpoint из задания
       const response = await axios.post('https://api.example.com/shifts', {
         latitude,
         longitude
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
       return response.data;
     } catch (error) {
